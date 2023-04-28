@@ -1,36 +1,45 @@
 import { Plugin } from 'obsidian'
 import { Emoji } from './emoji'
 
+function getTopTextContent(e: HTMLLIElement): string {
+  const topTextContents = []
+  const childNodes = e.childNodes
+  for (let i = 0; i < childNodes.length; i++) {
+    const childNode = childNodes.item(i)
+    if (childNode.nodeType === Node.TEXT_NODE && childNode.nodeValue !== null) {
+      topTextContents.push(childNode.nodeValue)
+    }
+  }
+  return topTextContents.join('')
+}
+
 export default class ExamplePlugin extends Plugin {
   async onload() {
     this.registerMarkdownPostProcessor((element, context) => {
+      const domParser = new DOMParser()
+      const customStateRegex = /^\[\w+\](?=\s)/
       const elements = element.querySelectorAll('li')
 
       for (let i = 0; i < elements.length; i++) {
         const e = elements.item(i)
-        const domParser = new DOMParser()
-        console.log('%o', domParser.parseFromString(e.innerHTML, 'text/html').body)
-
         const children = e.children
-        const isListBullet = children.item(0)?.outerHTML.startsWith('<div class="list-bullet">')
+
+        const firstChild = children.item(0)
+        const isListBullet = firstChild !== null && firstChild.outerHTML.startsWith('<div class="list-bullet">')
+
+        const taskDescription = getTopTextContent(e).trimEnd()
+        const taskStates = taskDescription.match(customStateRegex)
         const isCustomTask =
-					isListBullet
-					&& e.textContent !== null
-					&& e.textContent.startsWith('[')
-        if (isCustomTask)
-          console.log('Custom Task Found: %o', domParser.parseFromString(e.innerHTML, 'text/html').body)
+          isListBullet
+          && taskStates?.length === 1
+
+        if (isCustomTask) {
+          console.log('Custom Task Found "%s" : %o', taskDescription, domParser.parseFromString(e.innerHTML, 'text/html').body)
+
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          context.addChild(new Emoji(e, taskStates[0], taskDescription))
+        }
       }
-
-      // for (let index = 0; index < elements.length; index++) {
-      // 	const codeblock = elements.item(index);
-      // 	const text = codeblock.innerText.trim();
-      // 	const isEmoji = text[0] === ":" && text[text.length - 1] === ":";
-
-      // 	if (isEmoji) {
-      // 		context.addChild(new Emoji(codeblock, text));
-      // 		//
-      // 	}
-      // }
     })
   }
 }

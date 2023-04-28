@@ -2,22 +2,21 @@ import { MarkdownRenderChild } from 'obsidian'
 
 export class Emoji extends MarkdownRenderChild {
   static ALL_EMOJIS: Record<string, string> = {
-    ':+1:': '👍',
-    ':sunglasses:': '😎',
-    ':smile:': '😄'
+    '[doing]': '🚧'
   }
 
-  text: string
+  state: string
+  description: string
 
-  constructor(containerEl: HTMLElement, text: string) {
+  constructor(containerEl: HTMLElement, state: string, description: string) {
     super(containerEl)
-
-    this.text = text
+    this.state = state
+    this.description = description
   }
 
   onload() {
     const emojiEl = this.containerEl.createSpan({
-      text: Emoji.ALL_EMOJIS[this.text] ?? this.text
+      text: Emoji.ALL_EMOJIS[this.state] + this.description
     })
     this.containerEl.replaceWith(emojiEl)
   }
