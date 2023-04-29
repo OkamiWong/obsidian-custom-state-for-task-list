@@ -5,19 +5,32 @@ export class Emoji extends MarkdownRenderChild {
     '[doing]': '🚧'
   }
 
+  bulletNode: HTMLElement
+  textNode: Node
   state: string
   description: string
 
-  constructor(containerEl: HTMLElement, state: string, description: string) {
+  constructor(
+    containerEl: HTMLElement,
+    bulletNode: HTMLElement,
+    textNode: Node,
+    state: string,
+    description: string
+  ) {
     super(containerEl)
+    this.bulletNode = bulletNode
+    this.textNode = textNode
     this.state = state
     this.description = description
   }
 
   onload() {
     const emojiEl = this.containerEl.createSpan({
-      text: Emoji.ALL_EMOJIS[this.state] + this.description
+      cls: 'task-list-item-checkbox',
+      text: Emoji.ALL_EMOJIS[this.state]
     })
-    this.containerEl.replaceWith(emojiEl)
+    this.containerEl.classList.add('task-list-item')
+    this.bulletNode.replaceWith(emojiEl)
+    this.textNode.nodeValue = this.description
   }
 }

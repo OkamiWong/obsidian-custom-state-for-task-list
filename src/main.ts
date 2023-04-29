@@ -1,13 +1,23 @@
 import { Plugin } from 'obsidian'
 import { Emoji } from './emoji'
 
-function getTopTextContent(e: HTMLLIElement): string {
-  const topTextContents = []
+function getTextNodes(e: HTMLElement): Array<ChildNode> {
+  const textNodes = []
   const childNodes = e.childNodes
   for (let i = 0; i < childNodes.length; i++) {
     const childNode = childNodes.item(i)
-    if (childNode.nodeType === Node.TEXT_NODE && childNode.nodeValue !== null) {
-      topTextContents.push(childNode.nodeValue)
+    if (childNode.nodeType === Node.TEXT_NODE) {
+      textNodes.push(childNode)
+    }
+  }
+  return textNodes
+}
+
+function getTopTextContent(e: HTMLLIElement): string {
+  const topTextContents = []
+  for(const textNode of getTextNodes(e)){
+    if(textNode.nodeValue !== null){
+      topTextContents.push(textNode.nodeValue)
     }
   }
   return topTextContents.join('')
@@ -25,19 +35,18 @@ export default class ExamplePlugin extends Plugin {
         const children = e.children
 
         const firstChild = children.item(0)
-        const isListBullet = firstChild !== null && firstChild.outerHTML.startsWith('<div class="list-bullet">')
+        const isListItem = firstChild !== null && firstChild.outerHTML.startsWith('<div class="list-bullet">')
 
-        const taskDescription = getTopTextContent(e).trimEnd()
-        const taskStates = taskDescription.match(customStateRegex)
-        const isCustomTask =
-          isListBullet
-          && taskStates?.length === 1
+        const taskContent = getTopTextContent(e).trimEnd()
+        const taskStates = taskContent.match(customStateRegex)
 
-        if (isCustomTask) {
-          console.log('Custom Task Found "%s" : %o', taskDescription, domParser.parseFromString(e.innerHTML, 'text/html').body)
+        if (isListItem && taskStates?.length === 1) {
+          // taskContent: {taskState} {taskDescription} 
+          const taskState = taskStates[0]
+          const taskDescription = taskContent.substring(taskState.length).trim()
+          console.log('Custom Task Found "%s" : %o', taskContent, domParser.parseFromString(e.innerHTML, 'text/html').body)
 
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          context.addChild(new Emoji(e, taskStates[0], taskDescription))
+          context.addChild(new Emoji(e, firstChild as HTMLElement, getTextNodes(e)[0], taskState, taskDescription))
         }
       }
     })
