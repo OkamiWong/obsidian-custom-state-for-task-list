@@ -1,31 +1,28 @@
-import { Plugin } from 'obsidian'
-import { Emoji } from './emoji'
+import { MarkdownPostProcessorContext, Plugin } from 'obsidian'
+import { TaskView } from './task-view'
+import { getTextNodes, getTopTextContent } from './utilities'
+import { CustomState, DEFAULT_SETTINGS, MyPluginSettings, MySettingTab } from './setting-tab'
 
-function getTextNodes(e: HTMLElement): Array<ChildNode> {
-  const textNodes = []
-  const childNodes = e.childNodes
-  for (let i = 0; i < childNodes.length; i++) {
-    const childNode = childNodes.item(i)
-    if (childNode.nodeType === Node.TEXT_NODE) {
-      textNodes.push(childNode)
-    }
+export default class MyPlugin extends Plugin {
+  settings: MyPluginSettings
+
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData())
   }
-  return textNodes
-}
 
-function getTopTextContent(e: HTMLLIElement): string {
-  const topTextContents = []
-  for(const textNode of getTextNodes(e)){
-    if(textNode.nodeValue !== null){
-      topTextContents.push(textNode.nodeValue)
-    }
+  async saveSettings() {
+    await this.saveData(this.settings)
+
+    console.log(this.settings)
   }
-  return topTextContents.join('')
-}
 
-export default class ExamplePlugin extends Plugin {
   async onload() {
-    this.registerMarkdownPostProcessor((element, context) => {
+    await this.loadSettings()
+
+    this.addSettingTab(new MySettingTab(this.app, this))
+
+
+    this.registerMarkdownPostProcessor((element: HTMLElement, context: MarkdownPostProcessorContext) => {
       const domParser = new DOMParser()
       const customStateRegex = /^\[\w+\](?=\s)/
       const elements = element.querySelectorAll('li')
@@ -41,12 +38,21 @@ export default class ExamplePlugin extends Plugin {
         const taskStates = taskContent.match(customStateRegex)
 
         if (isListItem && taskStates?.length === 1) {
-          // taskContent: {taskState} {taskDescription} 
-          const taskState = taskStates[0]
-          const taskDescription = taskContent.substring(taskState.length).trim()
-          console.log('Custom Task Found "%s" : %o', taskContent, domParser.parseFromString(e.innerHTML, 'text/html').body)
+          const taskStateRaw = taskStates[0]
+          const taskDescription = taskContent.substring(taskStateRaw.length).trim()
 
-          context.addChild(new Emoji(e, firstChild as HTMLElement, getTextNodes(e)[0], taskState, taskDescription))
+          const taskState = taskStateRaw.substring(1, taskStateRaw.length - 1)
+          let matchedCustomState: CustomState | null = null
+          for (const customState of this.settings.customStates) {
+            if (customState.state === taskState) {
+              matchedCustomState = customState
+              break
+            }
+          }
+          if (matchedCustomState !== null) {
+            console.log('Custom Task Found "%s" : %o', taskContent, domParser.parseFromString(e.innerHTML, 'text/html').body)
+            context.addChild(new TaskView(e, firstChild as HTMLElement, getTextNodes(e)[0], matchedCustomState.readingView, taskDescription))
+          }
         }
       }
     })

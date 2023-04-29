@@ -1,36 +1,32 @@
 import { MarkdownRenderChild } from 'obsidian'
 
-export class Emoji extends MarkdownRenderChild {
-  static ALL_EMOJIS: Record<string, string> = {
-    '[doing]': '🚧'
-  }
-
+export class TaskView extends MarkdownRenderChild {
   bulletNode: HTMLElement
   textNode: Node
-  state: string
+  stateReadingView: string
   description: string
 
   constructor(
     containerEl: HTMLElement,
     bulletNode: HTMLElement,
     textNode: Node,
-    state: string,
+    stateReadingView: string,
     description: string
   ) {
     super(containerEl)
     this.bulletNode = bulletNode
     this.textNode = textNode
-    this.state = state
+    this.stateReadingView = stateReadingView
     this.description = description
   }
 
   onload() {
-    const emojiEl = this.containerEl.createSpan({
+    const stateReadingViewEl = this.containerEl.createSpan({
       cls: 'task-list-item-checkbox',
-      text: Emoji.ALL_EMOJIS[this.state]
+      text: this.stateReadingView
     })
     this.containerEl.classList.add('task-list-item')
-    this.bulletNode.replaceWith(emojiEl)
+    this.bulletNode.replaceWith(stateReadingViewEl)
     this.textNode.nodeValue = this.description
   }
 }
