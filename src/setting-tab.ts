@@ -46,6 +46,22 @@ export class MySettingTab extends PluginSettingTab {
 
     containerEl.empty()
 
+    containerEl.createEl('h1', { text: 'Custom State for Task List' })
+
+    containerEl
+      .createEl('p', { text: 'Introduction and usage: ' })
+      .createEl('a', {
+        text: 'README.md',
+        href: 'https://github.com/OkamiWong/obsidian-custom-state-for-task-list#readme'
+      })
+
+    containerEl
+      .createEl('p', { text: 'Developer: ' })
+      .createEl('a', {
+        text: 'Okami Wong',
+        href: 'https://github.com/OkamiWong'
+      })
+
     new Setting(containerEl)
       .setName('Reset custom states')
       .setDesc('Warning: this will roll back to the default settings and cause you to lose all the changes.')
@@ -72,7 +88,6 @@ export class MySettingTab extends PluginSettingTab {
       const customState = this.plugin.settings.customStates[i]
       new Setting(containerEl)
         .setName(`Custom State ${i + 1}`)
-        .setDesc('Set the name of the state and the string to display in the reading view. Emoji is recommended to use in reading view.')
         .addText(text => text
           .setPlaceholder('Name of the state')
           .setValue(customState.state)
