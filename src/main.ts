@@ -1,25 +1,25 @@
 import { MarkdownPostProcessorContext, Plugin } from 'obsidian'
 import { TaskView } from './task-view'
 import { getTextNodes, getTopTextContent } from './utilities'
-import { CustomState, DEFAULT_SETTINGS, MyPluginSettings, MySettingTab } from './setting-tab'
+import { CustomState, DEFAULT_SETTINGS, CustomTaskStatePluginSettings, CustomTaskStatePluginSettingTab } from './setting-tab'
 
-export default class MyPlugin extends Plugin {
-  settings: MyPluginSettings
+export default class CustomTaskStatePlugin extends Plugin {
+  settings: CustomTaskStatePluginSettings
 
   async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData())
+    this.settings = Object.assign({}, structuredClone(DEFAULT_SETTINGS), await this.loadData())
   }
 
   async saveSettings() {
     await this.saveData(this.settings)
 
-    console.log(this.settings)
+    // console.log(this.settings)
   }
 
   async onload() {
     await this.loadSettings()
 
-    this.addSettingTab(new MySettingTab(this.app, this))
+    this.addSettingTab(new CustomTaskStatePluginSettingTab(this.app, this))
 
 
     this.registerMarkdownPostProcessor((element: HTMLElement, context: MarkdownPostProcessorContext) => {
@@ -50,7 +50,7 @@ export default class MyPlugin extends Plugin {
             }
           }
           if (matchedCustomState !== null) {
-            console.log('Custom Task Found "%s" : %o', taskContent, domParser.parseFromString(e.innerHTML, 'text/html').body)
+            // console.log('Custom Task Found "%s" : %o', taskContent, domParser.parseFromString(e.innerHTML, 'text/html').body)
             context.addChild(new TaskView(e, firstChild as HTMLElement, getTextNodes(e)[0], matchedCustomState.readingView, taskDescription))
           }
         }

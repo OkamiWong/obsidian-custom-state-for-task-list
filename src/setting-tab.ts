@@ -1,16 +1,16 @@
 import { PluginSettingTab, App, Setting } from 'obsidian'
-import MyPlugin from './main'
+import CustomStateTaskPlugin from './main'
 
 export interface CustomState {
   state: string
   readingView: string
 }
 
-export interface MyPluginSettings {
+export interface CustomTaskStatePluginSettings {
   customStates: Array<CustomState>
 }
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
+export const DEFAULT_SETTINGS: CustomTaskStatePluginSettings = {
   customStates: [
     { state: 'committed', readingView: '📌' },
     { state: 'doing', readingView: '🚧' },
@@ -24,10 +24,10 @@ const DEFAULT_NEW_CUSTOM_STATE: CustomState = {
   readingView: '🆕'
 }
 
-export class MySettingTab extends PluginSettingTab {
-  plugin: MyPlugin
+export class CustomTaskStatePluginSettingTab extends PluginSettingTab {
+  plugin: CustomStateTaskPlugin
 
-  constructor(app: App, plugin: MyPlugin) {
+  constructor(app: App, plugin: CustomStateTaskPlugin) {
     super(app, plugin)
     this.plugin = plugin
   }
@@ -68,7 +68,7 @@ export class MySettingTab extends PluginSettingTab {
       .addButton(button => button
         .setButtonText('Reset')
         .onClick(async () => {
-          this.plugin.settings = DEFAULT_SETTINGS
+          this.plugin.settings = structuredClone(DEFAULT_SETTINGS)
           await this.commitChanges()
         }))
 
