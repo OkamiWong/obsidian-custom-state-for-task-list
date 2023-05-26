@@ -1,6 +1,5 @@
 import { MarkdownPostProcessorContext, Plugin } from 'obsidian'
 import { TaskView } from './task-view'
-import { getTextNodes, getTopTextContent } from './utilities'
 import { CustomState, DEFAULT_SETTINGS, CustomTaskStatePluginSettings, CustomTaskStatePluginSettingTab } from './setting-tab'
 
 export default class CustomTaskStatePlugin extends Plugin {
@@ -13,14 +12,24 @@ export default class CustomTaskStatePlugin extends Plugin {
   async saveSettings() {
     await this.saveData(this.settings)
 
-    // console.log(this.settings)
+    console.debug(this.settings)
+  }
+
+  findCustomState(taskState: string): CustomState | null {
+    let matchedCustomState: CustomState | null = null
+    for (const customState of this.settings.customStates) {
+      if (customState.state === taskState) {
+        matchedCustomState = customState
+        break
+      }
+    }
+    return matchedCustomState
   }
 
   async onload() {
     await this.loadSettings()
 
     this.addSettingTab(new CustomTaskStatePluginSettingTab(this.app, this))
-
 
     this.registerMarkdownPostProcessor((element: HTMLElement, context: MarkdownPostProcessorContext) => {
       const domParser = new DOMParser()
@@ -34,24 +43,17 @@ export default class CustomTaskStatePlugin extends Plugin {
         const firstChild = children.item(0)
         const isListItem = firstChild !== null && firstChild.outerHTML.startsWith('<div class="list-bullet">')
 
-        const taskContent = getTopTextContent(e).trimEnd()
+        const taskContent = e.innerText.trim()
         const taskStates = taskContent.match(customStateRegex)
 
-        if (isListItem && taskStates?.length === 1) {
+        if (isListItem && taskStates && taskStates.length >= 1) {
           const taskStateRaw = taskStates[0]
-          const taskDescription = taskContent.substring(taskStateRaw.length).trim()
-
           const taskState = taskStateRaw.substring(1, taskStateRaw.length - 1)
-          let matchedCustomState: CustomState | null = null
-          for (const customState of this.settings.customStates) {
-            if (customState.state === taskState) {
-              matchedCustomState = customState
-              break
-            }
-          }
+          const matchedCustomState = this.findCustomState(taskState)
+
           if (matchedCustomState !== null) {
-            // console.log('Custom Task Found "%s" : %o', taskContent, domParser.parseFromString(e.innerHTML, 'text/html').body)
-            context.addChild(new TaskView(e, firstChild as HTMLElement, getTextNodes(e)[0], matchedCustomState.readingView, taskDescription))
+            console.debug('Custom Task Found "%s" : %o', taskContent, domParser.parseFromString(e.innerHTML, 'text/html').body)
+            context.addChild(new TaskView(e, matchedCustomState))
           }
         }
       }

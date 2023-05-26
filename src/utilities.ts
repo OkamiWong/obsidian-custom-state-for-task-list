@@ -9,13 +9,3 @@ export function getTextNodes(e: HTMLElement): Array<ChildNode> {
   }
   return textNodes
 }
-
-export function getTopTextContent(e: HTMLLIElement): string {
-  const topTextContents = []
-  for (const textNode of getTextNodes(e)) {
-    if (textNode.nodeValue !== null) {
-      topTextContents.push(textNode.nodeValue)
-    }
-  }
-  return topTextContents.join('')
-}
