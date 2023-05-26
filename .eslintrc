@@ -17,6 +17,7 @@
   },
   "rules": {
     "no-unused-vars": "off",
+    "no-prototype-builtins": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
@@ -24,8 +25,8 @@
       }
     ],
     "@typescript-eslint/ban-ts-comment": "off",
-    "no-prototype-builtins": "off",
     "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
     "semi": [
       "error",
       "never"

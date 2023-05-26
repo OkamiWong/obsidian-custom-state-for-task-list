@@ -79,7 +79,7 @@ export class CustomTaskStatePluginSettingTab extends PluginSettingTab {
         button
           .setButtonText('Add')
           .onClick(async () => {
-            this.plugin.settings.customStates.push(DEFAULT_NEW_CUSTOM_STATE)
+            this.plugin.settings.customStates.push(structuredClone(DEFAULT_NEW_CUSTOM_STATE))
             await this.commitChanges()
           })
       })
