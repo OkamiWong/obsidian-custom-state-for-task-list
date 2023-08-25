@@ -1,4 +1,6 @@
 # Custom state for task list in Obsidian
+![Obsidian Downloads](https://img.shields.io/badge/dynamic/json?logo=obsidian&color=%23483699&label=downloads&query=%24%5B%22custom-state-for-task-list%22%5D.downloads&url=https%3A%2F%2Fraw.githubusercontent.com%2Fobsidianmd%2Fobsidian-releases%2Fmaster%2Fcommunity-plugin-stats.json)
+
 
 A plugin for [Obsidian](https://obsidian.md) to help you define your own states for task list!
 
