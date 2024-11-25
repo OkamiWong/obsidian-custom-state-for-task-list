@@ -41,7 +41,9 @@ export default class CustomTaskStatePlugin extends Plugin {
         const children = e.children
 
         const firstChild = children.item(0)
-        const isListItem = firstChild !== null && firstChild.outerHTML.startsWith('<div class="list-bullet">')
+        const isListItem = firstChild !== null
+          && (firstChild.outerHTML.startsWith('<span class="list-bullet">')
+            || firstChild.outerHTML.startsWith('<div class="list-bullet">'))
 
         const taskContent = e.innerText.trim()
         const taskStates = taskContent.match(customStateRegex)
